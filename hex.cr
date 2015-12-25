@@ -12,9 +12,9 @@ struct Slice(T)
   def hexdump(buffer)
     self as Slice(UInt8)
 
-    (((size / 8) + 1) * 58).times do |i|
-      #   buffer[i] = 0x20_u8
-    end
+    # (((size / 8) + 1) * 58).times do |i|
+    #   buffer[i] = 0x20_u8
+    # end
 
     hex_offset = 0
     ascii_offset = 41
@@ -23,8 +23,9 @@ struct Slice(T)
       buffer[hex_offset + 1] = to_hex(v & 0x0f)
       hex_offset += 2
 
-      buffer[ascii_offset] = v
+      buffer[ascii_offset] = (v > 31 && v < 127) ? v : '.'.ord.to_u8
       ascii_offset += 1
+
       if (i % 2 != 0)
         buffer[hex_offset] = 0x20_u8
         hex_offset += 1
@@ -47,8 +48,9 @@ struct Slice(T)
   end
 end
 
-j = ("abcdefghijklmnopqrstuvxyzabcdefgh"*2).to_slice
-p j
+j = ("\u{FF}abcdefghijk\5lmnopqrstuvxyzabcdefgh"*3).to_slice
+j = StaticArray(UInt8, 255).new(&.to_u8).to_slice
+# p j
 puts j.hexstring
 puts
 puts j.hexdump
